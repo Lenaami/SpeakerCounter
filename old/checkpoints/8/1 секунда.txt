@@ -1,0 +1,14 @@
+for idx in indexes:
+    rand_inputs.append(inputs[idx][:100][:]) ### [idx][:][:]
+    rand_outputs.append(outputs[idx][:])
+
+Урезано с 500 до 100 (1 секунда аудио)
+
+В сети изменено:
+the_network.add(keras.layers.Reshape((9, 1280)))
+
+
+data/data_1.pickle
+data/data_2.pickle
+
+data/labels.pickle

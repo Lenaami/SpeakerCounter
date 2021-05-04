@@ -1,0 +1,19 @@
+path_audio: 'F:\\amicorpus_1'
+path_to_file_count: 'data\\AMI\\Count_new\\' # путь к разметке кол-ва дикторов
+path_to_file_vad: 'outputs\\logunov\\speech_regions_predicted_vad_markup_bad_repaired_' + v_vad + '\\' # vad
+path_to_file_ideal_vad: 'data\\AMI\\NoSilence_new\\'
+path_to_file_test: 'data\\AMI\\Test_new\\'
+
+model_arch: 'LSTM' # 'LSTM', 'CNN'
+dataset: 'AMI' # 'AMI', '               
+sec: sec
+n_classes: 5 # 4 или 5
+features: features # 'stft', 'melsp', 'melsp_1', 'mfcc'
+
+audio_amp: '4mean'
+vad: 'test' # vad, ideal_vad, none, test (!)
+v_vad: v_vad
+ms : True # разметка по милисекундам или целым секундам
+inverse_vad': False # определение речи или тишины
+
+add_name: '' # дополнительное имя для теста
