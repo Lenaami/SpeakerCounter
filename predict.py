@@ -134,7 +134,7 @@ def predict(sec, features):
 
     audio_names = get_list_of_data(**args)
 
-    path_to = 'outputs\\' + create_model_name(**args) + '\\' + create_predict_name(**args) + '\\'
+    path_to = 'F:\\nirma\\SpeakerCounter-outputs\\' + create_model_name(**args) + '\\' + create_predict_name(**args) + '\\'
     #path_to = 'outputs\\CountNet_CRNN\\' + create_predict_name(**args) + '\\'
 
     if not os.path.exists(path_to + 'pkl'):

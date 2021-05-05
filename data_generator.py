@@ -12,10 +12,12 @@ import sklearn
 
 import os
 
+from utils_.extract_features import extract_features
+from utils_.data_list import get_data_list
+
 input_features = {
     'stft': 201,
     'melsp': 128,
-    'melsp_1': 128,
     'mfcc': 40
 }
 
@@ -23,9 +25,8 @@ class DataGenerator(Sequence):
     """Generates data for Keras
     Sequence based data generator. Suitable for building data generator for training and prediction.
     """
-    def __init__(self, audio_list, audio_path, sec, features,
-                 to_fit=True, batch_size=32, dim=(500, 201),
-                 n_channels=1, n_classes=5, shuffle=False, **kwargs):
+    def __init__(self, audio_list, batch_size, audio_path, audio_type, n_classes, sec, features,
+                 to_fit=True, dim=(500, 201), n_channels=1, shuffle=False, **kwargs):
         """Initialization
         :param list_IDs: list of all 'label' ids to use in the generator
         :param labels: list of image labels (file names)
@@ -45,8 +46,10 @@ class DataGenerator(Sequence):
         labels = []
         k = 0
 
-        for audio in audio_list:
-            file_csv = 'data\\AMI\\Count_new\\' + audio + '.count.csv' # путь к файлам
+        # Завернуть в get_metrics
+        # Создание list_IDs
+        for audio_name in audio_list:
+            file_csv = 'data\\AMI\\Count_new\\' + audio_name + '.count.csv' # путь к файлам
 
             DATA = pd.read_csv(file_csv, delimiter=',') # колонки - start, duration, count или (start, end, duration, count)
             data = DATA.values
@@ -62,15 +65,16 @@ class DataGenerator(Sequence):
                 if max_pers > 4: 
                     max_pers = 4
 
-                list_IDs.append([k, audio, i*sec])
+                list_IDs.append([k, audio_name, i*sec])
                 k += 1
                 labels.append(max_pers)
 
+        # Создание словаря с путями до файлов
+        audio = get_data_list(audio_list, audio_type, audio_path, use_dict=True)
 
         self.list_IDs = list_IDs
         self.labels = labels
-        self.audio_path = audio_path
-        self.audio_list = audio_list # имена файлов для обработки
+        self.audio = audio
         self.to_fit = to_fit
         self.batch_size = batch_size
         self.dim = (sec*100, input_features[features]) #dim 
@@ -177,49 +181,32 @@ class DataGenerator(Sequence):
 
             if self.cur_audio_name != ID[1]:
                 self.cur_audio_name = ID[1]
-                #self.cur_audio, self.cur_audio_rate = sf.read(self.audio_path + ID[1] + '\\audio\\' + ID[1] + '.Array1-01.wav', always_2d=True) # ID[1] - имя файла
-                #self.cur_audio = np.mean(self.cur_audio, axis=1)
+                self.cur_audio, self.cur_audio_rate = sf.read(self.audio[ID[1]], always_2d=True) # ID[1] - имя файла
+                self.cur_audio = np.mean(self.cur_audio, axis=1)
                 ### Для предобработанных файлов
-                with open('F:\\amicorpus_2\\original_pickle\\' + ID[1] + '.pickle', 'rb') as f:
-                    self.cur_audio = pickle.load(f)
+                #with open('F:\\amicorpus_2\\original_pickle\\' + ID[1] + '.pickle', 'rb') as f:
+                #    self.cur_audio = pickle.load(f)
 
             ### Для предобработанных файлов
-            sec_begin = int(ID[2]//self.sec)
-            X_1 = self.cur_audio[sec_begin]
-            '''
+            #sec_begin = int(ID[2]//self.sec)
+            #X_1 = self.cur_audio[sec_begin]
+            
             # Для обработки на ходу
             sec_begin = int(ID[2]*self.cur_audio_rate) # ID[2] - секунда, с которой нужно считать            
             audio_part = self.cur_audio[sec_begin:sec_begin+int(self.sec*self.cur_audio_rate)]
 
-            X_0 = np.abs(librosa.stft(audio_part, n_fft=400, hop_length=160)).T
-
-            if self.features == 'stft':
-
-                X_0 = self.scaler.transform(X_0)
-                X_1 = np.zeros((int(100*self.sec), 201))
-
-            if self.features == 'melsp_1':
-
-                X_0 = librosa.feature.melspectrogram(y=audio_part, sr=self.cur_audio_rate, S=X_0.T, n_fft=400, hop_length=160).T
-                X_0 = librosa.power_to_db(X_0, ref=np.max)
-                X_0 = self.scaler.transform(X_0)
-                X_1 = np.zeros((int(100*self.sec), 128))
-
-            if self.features == 'mfcc':
-
-                X_0 = librosa.feature.mfcc(y=audio_part, sr=self.cur_audio_rate, S=X_0.T, n_mfcc=40).T
-                X_0 = self.scaler.transform(X_0)
-                X_1 = np.zeros((int(100*self.sec), 40))
+            X_0 = extract_features(audio_part, self.cur_audio_rate, self.features)                 
 
             # cut to input shape length (500 frames x 201 STFT bins)
-            X_0 = X_0[:int(100*self.sec), :] 
+            X_0 = self.scaler.transform(X_0)
+            X_0 = X_0[:int(100*self.sec), :]
+            X_1 = np.zeros(self.dim) 
             X_1[:X_0.shape[0], :] = X_0 
 
             # apply l2 normalization
             Theta = np.linalg.norm(X_1, axis=1) + self.eps
             X_1 /= np.mean(Theta)
-            '''
-
+            
             # Store sample
             X[i,] = X_1
 

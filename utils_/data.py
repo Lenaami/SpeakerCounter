@@ -10,7 +10,7 @@ classes = {
     5: '0-4'
 }
 
-def load_train_data(n_classes, sec, features, f_use_for_validation, **kwargs):
+def load_train_data(n_classes, sec, features, use_for_validation, **kwargs):
 
     t_start = time.time()
     
@@ -23,7 +23,7 @@ def load_train_data(n_classes, sec, features, f_use_for_validation, **kwargs):
     # Experiment Parameters
     n_classes = outputs.shape[1]
     sz_set = inputs.shape[0]
-    sz_validate = int(sz_set * f_use_for_validation)
+    sz_validate = int(sz_set * use_for_validation)
     sz_train = int(sz_set - sz_validate)
     sz_input = str(inputs.shape[1]) + ', ' + str(inputs.shape[2])
 
