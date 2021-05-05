@@ -1,11 +1,13 @@
-f_use_for_validation: 0.02
 batch_size: 100 # 25 для 5 секунд (10 не оч)
-n_epochs: 160 
-f_start_lr: 0.001
-audio_path: 'F:\\amicorpus_1\\'
-model:
-  model_arch: 'LSTM' # 'CNN', 'LSTM'
-  n_classes: 5
-  sec: 1 
-  features: 'stft' # 'stft', 'melsp', 'melsp_1', 'mfcc'
-  dataset: 'AMI' # 'LC', 'AMI', 'LC_AMI'
+n_epochs: 50
+start_lr: 0.001
+audio_path: 'F:\nirma\databases\amicorpus\' # сервер: /srv/data/AMI/amicorpus
+audio_type: 'Array1-01'
+checkpoints_path: 'checkpoints\'
+
+model_arch: 'LSTM' # 'CNN', 'LSTM'
+n_classes: 5
+sec: 1 
+features: 'stft' # 'stft', 'melsp', 'mfcc'
+dataset: 'AMI' # 'LC', 'AMI', 'LC_AMI'
+add_name: 'mini'

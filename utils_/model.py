@@ -1,4 +1,5 @@
 import os
+import tensorflow as tf
 from tensorflow import keras
 
 classes = {
@@ -7,6 +8,12 @@ classes = {
 }
 
 def create_model_LSTM(n_classes, sec, features, **kwargs):
+
+    '''
+    n_classes = kwargs['n_classes']  
+    sec = kwargs['sec']  
+    features = kwargs['features']
+    '''
 
     units_reshape_1 = {
         500: 53, 
@@ -21,14 +28,12 @@ def create_model_LSTM(n_classes, sec, features, **kwargs):
     units_reshape_2 = {
         'stft': 1280,
         'melsp': 768,
-        'melsp_1': 768,
         'mfcc': 192
     }
 
     input_features = {
         'stft': 201,
         'melsp': 128,
-        'melsp_1': 128,
         'mfcc': 40
     }
 
@@ -86,6 +91,12 @@ def create_model_LSTM(n_classes, sec, features, **kwargs):
 
 def create_model_CNN(n_classes, sec, features, **kwargs):
 
+    '''
+    n_classes = kwargs['n_classes']  
+    sec = kwargs['sec']  
+    features = kwargs['features']
+    '''
+
     units_reshape_1 = {
         500: 53, 
         400: 42, 
@@ -99,7 +110,6 @@ def create_model_CNN(n_classes, sec, features, **kwargs):
     input_features = {
         'stft': 201,
         'melsp': 128,
-        'melsp_1': 128,
         'mfcc': 40
     }
 
@@ -227,17 +237,44 @@ def create_model_CNN(n_classes, sec, features, **kwargs):
     return the_network
 
 
-def load_model(model_arch, n_classes, sec, features, dataset, **kwargs):
+def load_model(**kwargs): #model_arch, n_classes, sec, features, dataset, add_name
 
-    the_network = keras.models.load_model(
-        os.path.join('checkpoints\\' + create_model_name(model_arch, n_classes, sec, features, dataset, **kwargs), 'the_network.h5'),
-    )
+    model_name = create_model_name(**kwargs)
 
-    return the_network
+    if not os.path.exists(kwargs['checkpoints_path'] + model_name + '\\the_network.h5'):
+        os.makedirs(kwargs['checkpoints_path'] + model_name)
+        
+        if kwargs['model_arch'] == 'LSTM':
+            the_network = create_model_LSTM(**kwargs)
+        elif kwargs['model_arch'] == 'CNN':
+            the_network = create_model_CNN(**kwargs)
+
+        # Можно добавить метрики в создание модели
+        the_network.compile(optimizer=tf.optimizers.Adam(kwargs['start_lr']), 
+                            loss=keras.losses.categorical_crossentropy, 
+                            metrics=['categorical_accuracy'])
+
+    else:
+        the_network = keras.models.load_model(
+            os.path.join(kwargs['checkpoints_path'] + model_name, 'the_network.h5'),
+        )
+
+    return the_network, model_name
 
 
-def create_model_name(model_arch, n_classes, sec, features, dataset, **kwargs):
+def create_model_name(model_arch, n_classes, sec, features, dataset, add_name, **kwargs):
+
+    '''
+    model_arch = kwargs['model_arch']
+    n_classes = kwargs['n_classes']  
+    sec = kwargs['sec']  
+    features = kwargs['features'] 
+    dataset = kwargs['dataset'] 
+    add_name = kwargs['add_name']
+    '''
 
     name = 'model_' + model_arch + '_' + classes[n_classes] + '_' + str(sec) + 'sec_' + features + '_' + dataset
+    if add_name != '':
+        name = name + '_' + add_name
 
     return name

@@ -1,80 +1,39 @@
 import os
-import datetime
 import time
-import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.callbacks import CSVLogger
-from sklearn.metrics import confusion_matrix
+import yaml
 
-from utils_.model import create_model_LSTM, create_model_CNN, load_model, create_model_name
-from utils_.data import load_train_data
-
+from utils_.model import load_model
 from data_generator import DataGenerator
 
-class ConfusionMatrix(keras.callbacks.Callback):
-
-    def __init__(self, val_data):
-        super(ConfusionMatrix, self).__init__()
-        self.validation_data = val_data
-
-    def on_epoch_end(self, epoch, logs={}):
-        print('Confusion matrix: ')
-        y_prob = self.model.predict(self.validation_data[0])
-        y_pred = np.argmax(y_prob, axis=1)
-        y_true = np.argmax(self.validation_data[1], axis=1)
-        print(confusion_matrix(y_true, y_pred))
 
 def train(sec, features):
 
-    # задать список параметров, которые можно менять (длительность, модель, классы, предобработка)
-    sb = int(125 // sec) #int(125 // sec)
+    # Список параметров
+    with open('yaml/train.yaml') as f:
+        args = yaml.load(f, Loader=yaml.FullLoader)
 
-    args = {
-        'f_use_for_validation': 0.02,
-        'batch_size': sb, # 25 для 5 секунд (10 не оч)
-        'n_epochs': 160, #160
-        'f_start_lr': 0.001,
+    # Изменяемые параметры
+    bs = int(125 // sec)
+    args['batch_size'] = bs
+    args['sec'] = sec
+    args['features'] = features
 
+    # Сеты AMI
+    with open('yaml/ami_sets_mini.yaml') as f:
+        ami_sets = yaml.load(f, Loader=yaml.FullLoader)
+    training_generator = DataGenerator(ami_sets['train'], **args)
+    validation_generator = DataGenerator(ami_sets['test'], **args)
 
-        'model_arch': 'LSTM', # 'CNN', 'LSTM'
-        'n_classes': 5,
-        'sec': sec, 
-        'features': features, # 'stft', 'melsp', 'melsp_1', 'mfcc'
-
-        'dataset': 'AMI', # 'LC', 'AMI', 'LC_AMI'
-        'audio_path': 'F:\\amicorpus_1\\'
-    }
- 
-    s_model_save_dir =  'checkpoints\\' + create_model_name(**args)
-
-    if not os.path.exists(s_model_save_dir):
-        os.makedirs(s_model_save_dir)
-
-    s_log_file = s_model_save_dir + "\\the_network_log.csv"
-
-
-    #x_train, y_train, x_validate, y_validate = load_train_data(**args)
-
-    
-    train_audio_list = ['EN2001a']
-    validation_audio_list = ['EN2001b']
-    training_generator = DataGenerator(train_audio_list, **args)
-    validation_generator = DataGenerator(validation_audio_list, **args)
-
-    the_network = create_model_LSTM(**args)
-
-    #the_network = create_model_CNN(**args)
-
-    
-    the_network.compile(optimizer=tf.optimizers.Adam(args['f_start_lr']), 
-                        loss=keras.losses.categorical_crossentropy, 
-                        metrics=['categorical_accuracy'])
-
+    # Загрузка/создание модели
+    the_network, model_name = load_model(**args)
     the_network.summary()
     
-    #class_predictions = ConfusionMatrix((x_validate, y_validate))
+    s_model_save_dir =  args['checkpoints_path'] + model_name
 
+    s_log_file = s_model_save_dir + "\\the_network_log.csv"
     csv_logger = CSVLogger(s_log_file, append=True, separator=';')
     
     model_saver = keras.callbacks.ModelCheckpoint(s_model_save_dir + "\\the_network.h5", 
@@ -86,15 +45,7 @@ def train(sec, features):
                                                   save_freq='epoch')
 
     t_start = time.time()
-    '''
-    the_network.fit(x = x_train, 
-                    y = y_train, 
-                    epochs=args['n_epochs'], 
-                    batch_size=args['batch_size'], 
-                    validation_data=(x_validate, y_validate),
-                    callbacks=[class_predictions, csv_logger, model_saver])
-    '''
-    # Для DataGenerator (не придумано как переделать class predictions) 
+
     the_network.fit(
                     training_generator, 
                     epochs=args['n_epochs'], 
@@ -105,13 +56,6 @@ def train(sec, features):
     
     t_stop = time.time()
     print("Training time : " + str(t_stop - t_start))
-    
-
-
-    # сделать такой же код для train + дообучение (попробовать подгрузить модель, скомпилировать и запустить дообучение)
-    # сделать код для графиков (*)
-    # функция для создания датасета (разные длительности и разная предобработка)
-
 
 
 def main(_):
