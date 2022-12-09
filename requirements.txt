@@ -1,0 +1,16 @@
+tensorflow
+tensorflow-gpu
+numpy
+datetime
+scipy
+scikit-learn
+soundfile
+argparse
+keras
+librosa
+pandas
+matplotlib==3.2
+seaborn
+tqdm
+torch
+torchaudio

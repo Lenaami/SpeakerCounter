@@ -1,0 +1,29 @@
+audio_path: '/srv/data/AMI/amicorpus/'
+audio_type: 'Mix-Lapel' # 'Mix-Lapel', 'Array1-01'
+
+path_to_file_count: './data/AMI/Count_new/' # путь к разметке кол-ва дикторов
+
+checkpoints_path: './checkpoints/'
+outputs_path: './outputs/'
+
+#path_to_file_vad: '/srv/data/xxx/markup_with_different_gluing_coef/speech_regions_predicted_vad_markup_bad_repaired_' # + v_vad + '\\' # vad
+path_to_file_vad: './data/AMI/vad/'
+path_to_file_ideal_vad: './data/AMI/NoSilence_new/'
+path_to_file_test: './data/AMI/Test_new/'
+
+set_path: './yaml/ami_sets.yaml'
+
+model_arch: 'LSTM' # 'LSTM', 'CNN'
+dataset: 'AMIaug' # 'AMI', '
+sec: 1
+n_classes: 5 # 4 или 5
+features: 'stft' # 'stft', 'melsp', 'melsp_1', 'mfcc'
+
+audio_amp: 'none' # '4mean', 'none'
+vad: 'none' # vad, ideal_vad, none, test (!)
+v_vad: '' # '2.0'
+ms : False #True # разметка по милисекундам или целым секундам
+inverse_vad: False # определение речи или тишины
+
+add_name: 'mini20_scalerAMI_augMH' # дополнительное имя для модели
+add_name_test: 'train' # дополнительное имя для теста

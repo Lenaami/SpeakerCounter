@@ -1,0 +1,26 @@
+batch_size: 200 # 25 для 5 секунд
+n_epochs: 50
+start_lr: 0.001
+checkpoints_path: './checkpoints/'
+add_name: 'mini20_scalerAMI_augMH' #mini20_scalerAMI
+
+dataset: 'AMIaug' # 'LC', 'AMI', 'LC_AMI', 'AMIaug'
+audio_path: '/srv/data/AMI/amicorpus/' # 'F:\nirma\databases\amicorpus\'
+audio_type: 'Array1-01'
+marks_path: './data/AMI/Count_new/'
+set_path: './yaml/ami_sets_mini20.yaml'
+
+model_arch: 'CNN' # 'CNN', 'LSTM'
+n_classes: 5
+sec: 1
+features: 'stft' # 'stft', 'melsp', 'mfcc'
+
+augmented:
+  audio_path: './data/AMI/augmented_mh/'
+  audio_type: 'Mix-Headset'
+  marks_path: './data/AMI/Count_aug_mh/'
+
+  n_classes: 5
+  sec: 1
+  features: 'stft'
+
