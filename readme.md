@@ -38,6 +38,12 @@ F1-score – 0,41 для 5 классов (от 0 до 4 дикторов).
 </p>
 
 ---
+
+Статья на конференцию SPECOM с использованием этой модели:
+
+[Improvement of Speaker Number Estimation by Applying an Overlapped Speech Detector](https://www.researchgate.net/publication/354759877_Improvement_of_Speaker_Number_Estimation_by_Applying_an_Overlapped_Speech_Detector)
+
+---
 ### REFs
 
 1. CountNet: Stöter, Fabian-Robert et al. “Classification vs. Regression in Supervised Learning for Single Channel Speaker Count Estimation.” 2018 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP) (2018): 436-440.
